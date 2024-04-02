@@ -13,6 +13,6 @@ RUN python3 -m venv /venv && \
     python3 setup.py install
 
 # Copy the virtualenv into a distroless image
-FROM gcr.io/distroless/python3-debian12:nonroot@sha256:95f5fa82f7cc7da0e133a8a895900447337ef0830870ad8387eb4c696be17057
+FROM gcr.io/distroless/python3-debian12:nonroot@sha256:538f54b8d704c29137d337aeac1bfc874afd7db813b163b585366d57ec113e13
 COPY --from=build /venv /venv
 ENTRYPOINT ["/venv/bin/mlat-client"]
