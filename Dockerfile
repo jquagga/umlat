@@ -1,18 +1,13 @@
-# Mostly from: https://github.com/GoogleContainerTools/distroless/blob/main/examples/python3-requirements/Dockerfile
-# Build a virtualenv using the appropriate Debian release
+# micromaba
+FROM ghcr.io/mamba-org/micromamba:latest@sha256:fde96a63f99bc5a69aed952bca467a13f92410c5862adde4607c4d125daf026b
+COPY --chown=$MAMBA_USER:$MAMBA_USER environment.yml /tmp/environment.yml
+RUN micromamba install -y -n base -f environment.yml && \
+    micromamba clean --all --yes
 
-FROM debian:12-slim@sha256:ccb33c3ac5b02588fc1d9e4fc09b952e433d0c54d8618d0ee1afadf1f3cf2455 AS build
-RUN apt-get update && \
-    apt-get install --no-install-suggests --no-install-recommends --yes git python3-venv gcc libpython3-dev
-WORKDIR /app
-RUN git clone https://github.com/wiedehopf/mlat-client
-WORKDIR /app/mlat-client
-RUN python3 -m venv /venv && \
-    . /venv/bin/activate && \
-    python3 setup.py build && \
-    python3 setup.py install
+ARG MAMBA_DOCKERFILE_ACTIVATE=1
+WORKDIR /build
+RUN git clone https://github.com/wiedehopf/mlat-client /build 
+RUN python setup.py build && \
+    python setup.py install 
 
-# Copy the virtualenv into a distroless image
-FROM gcr.io/distroless/python3-debian12:nonroot@sha256:538f54b8d704c29137d337aeac1bfc874afd7db813b163b585366d57ec113e13
-COPY --from=build /venv /venv
-ENTRYPOINT ["/venv/bin/mlat-client"]
+ENTRYPOINT ["/usr/local/bin/_entrypoint.sh", "mlat-client"]
